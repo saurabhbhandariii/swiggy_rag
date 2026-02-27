@@ -200,7 +200,7 @@ Three complementary layers prevent hallucination:
 
 | Variable | Description |
 |----------|-------------|
-| `OPENAI_GROQ_KEY` | Your OpenAI API key (required) |
+  | `OPENAI_GROQ_KEY` | Your groq API key (required) |
 
 ---
 
