@@ -183,7 +183,7 @@ class CrossEncoderReranker:
     def __init__(self):
         if CrossEncoderReranker._model is None:
             logger.info(f"Loading cross-encoder: {CROSS_ENCODER_MODEL}")
-            CrossEncoderReranker._model = CrossEncoder(CROSS_ENCODER_MODEL)
+            CrossEncoderReranker._model = CrossEncoder(     CROSS_ENCODER_MODEL,     device="cpu",     automodel_args={"ignore_mismatched_sizes": True}, )
 
     def rerank(self, query: str, docs: List[Document], top_k: int = TOP_K_RERANK) -> List[Document]:
         if not docs:
