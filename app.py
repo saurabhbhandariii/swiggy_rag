@@ -1,7 +1,7 @@
 """
 app.py
 ------
-Streamlit UI for the Swiggy Annual Report RAG QA System.
+Streamlit UI for the  RAG QA System.
 FREE VERSION — uses HuggingFace embeddings + Groq LLM (no OpenAI needed).
 """
 
@@ -111,7 +111,7 @@ with st.sidebar:
 # ─────────────────────────────────────────────
 # Main Area
 # ─────────────────────────────────────────────
-st.title("🍊 Swiggy Annual Report RAG QA System")
+st.title("🍊  RAG QA System")
 st.markdown(
     "Ask any question about the Swiggy Annual Report. "
     "Answers are grounded **strictly** in the document — no hallucination."
