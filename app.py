@@ -111,7 +111,7 @@ with st.sidebar:
 # ─────────────────────────────────────────────
 # Main Area
 # ─────────────────────────────────────────────
-st.title("🍊  RAG QA System")
+st.title("  RAG QA System")
 st.markdown(
     "Ask any question about the Swiggy Annual Report. "
     "Answers are grounded **strictly** in the document — no hallucination."
