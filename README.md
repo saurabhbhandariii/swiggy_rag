@@ -211,5 +211,3 @@ Three complementary layers prevent hallucination:
 - **`@st.cache_resource`** caches the index load across Streamlit reruns
 - **`st.session_state`** tracks processing status and prevents duplicate work
 - **Lazy PDF loading** (`lazy_load()`) streams pages without loading the full file into RAM
-#   s w i g g y _ r a g  
- 

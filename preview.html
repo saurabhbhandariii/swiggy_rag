@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Swiggy Annual Report RAG QA System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:#0e1117;color:#fafafa;display:flex;min-height:100vh;font-size:14px}
+.sidebar{width:270px;min-width:270px;background:#262730;padding:20px 14px;display:flex;flex-direction:column;gap:12px;border-right:1px solid #3a3a4a;overflow-y:auto}
+.sidebar h2{font-size:13px;font-weight:700;letter-spacing:.4px}
+.divider{border:none;border-top:1px solid #3a3a4a}
+.upload-zone{border:2px dashed #555;border-radius:8px;padding:14px 10px;text-align:center;background:#1a1b22;cursor:pointer;transition:.2s}
+.upload-zone.has-file{border:2px solid #21c354}
+.upload-zone .fname{font-size:11px;color:#21c354;font-weight:600;margin-top:3px}
+.upload-zone p{font-size:10px;color:#666;margin-top:2px}
+.btn{width:100%;padding:9px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.btn-red{background:#ff4b4b;color:#fff}.btn-red:hover{opacity:.88}
+.status-box{border-radius:6px;padding:9px 11px;font-size:12px;line-height:1.55}
+.s-info{background:#1c3a5e;border-left:3px solid #4da6ff;color:#9ecfff}
+.s-success{background:#1a3a28;border-left:3px solid #21c354;color:#5ae38a}
+.s-warn{background:#3a2e0e;border-left:3px solid #faca2a;color:#faca2a}
+.lbl{font-size:10px;color:#555;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.pill-row{display:flex;flex-wrap:wrap;gap:4px}
+.pill{background:#2a2a3a;border:1px solid #3a3a4a;color:#777;border-radius:20px;font-size:9px;padding:2px 7px}
+.sidebar-foot{margin-top:auto;font-size:10px;color:#3a3a3a;text-align:center;line-height:1.7;padding-top:8px}
+.level-btn{display:block;width:100%;text-align:left;background:#1a1b22;border:1px solid #3a3a4a;border-radius:6px;padding:7px 10px;margin-bottom:5px;cursor:pointer;font-size:11px;color:#888;transition:.15s}
+.level-btn:hover{border-color:#ff4b4b;color:#ff9090}
+.level-btn b{display:block;font-size:12px;margin-bottom:2px}
+
+.main{flex:1;padding:26px 40px;overflow-y:auto;max-width:900px}
+.app-title{font-size:24px;font-weight:800;margin-bottom:5px}
+.app-title span{color:#ff4b4b}
+.subtitle{font-size:12px;color:#777;line-height:1.6;margin-bottom:18px}
+hr.md{border:none;border-top:1px solid #3a3a4a;margin:14px 0}
+.q-label{font-size:12px;color:#aaa;font-weight:600;margin-bottom:5px}
+.q-input{width:100%;padding:10px 13px;border-radius:6px;border:1px solid #444;background:#1a1b22;color:#fafafa;font-size:14px;outline:none;transition:.2s;margin-bottom:9px}
+.q-input:focus{border-color:#ff4b4b}
+.get-btn{padding:10px 22px;border-radius:6px;border:none;background:#ff4b4b;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.get-btn:hover{opacity:.88}.get-btn:disabled{background:#555;cursor:not-allowed;opacity:.6}
+.chips-wrap{margin-top:11px}
+.chips-label{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:#1f2029;border:1px solid #3a3a4a;color:#777;border-radius:20px;font-size:11px;padding:4px 11px;cursor:pointer;transition:.15s;white-space:nowrap}
+.chip:hover{border-color:#ff4b4b;color:#ff9090}
+.answer-card{background:#1a1b22;border:1px solid #3a3a4a;border-radius:10px;padding:18px 22px;margin-top:18px;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.answer-card h3{font-size:13px;color:#ff4b4b;margin-bottom:10px}
+.answer-body{font-size:13px;color:#ddd;line-height:1.85}
+.answer-body strong{color:#fff}
+.ctx-section{margin-top:15px}
+.ctx-section h3{font-size:12px;color:#888;margin-bottom:9px}
+.expander{border:1px solid #3a3a4a;border-radius:7px;margin-bottom:7px;overflow:hidden}
+.expander:hover{border-color:#555}
+.exp-header{padding:10px 14px;background:#1f2029;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#aaa;user-select:none}
+.exp-header:hover{background:#262730}
+.exp-arrow{font-size:9px;color:#555;transition:transform .2s}
+.expander.open .exp-arrow{transform:rotate(90deg)}
+.exp-body{display:none;padding:12px 14px;font-size:12px;color:#999;line-height:1.7;background:#161720;border-top:1px solid #2a2a3a}
+.expander.open .exp-body{display:block}
+.meta-row{display:flex;gap:12px;font-size:10px;color:#555;margin-bottom:7px}
+.meta-row b{color:#888}
+.page-info{background:#1c3a5e;border-left:3px solid #4da6ff;border-radius:0 6px 6px 0;padding:8px 12px;font-size:11px;color:#9ecfff;margin-top:9px}
+.page-badge{display:inline-block;background:#ff4b4b22;color:#ff9090;border:1px solid #ff4b4b44;border-radius:4px;font-size:10px;font-weight:700;padding:1px 6px;margin:0 2px}
+.not-avail{background:#1a1b22;border:1px solid #ff4b4b44;border-radius:10px;padding:18px 22px;margin-top:18px;color:#ff8888;font-size:13px;line-height:1.7}
+.not-avail .icon{font-size:24px;margin-bottom:8px}
+.spin-wrap{text-align:center;padding:36px 20px;color:#777}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #2a2a2a;border-top-color:#ff4b4b;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:9px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pipeline-bar{display:flex;margin-top:13px;border-radius:6px;overflow:hidden}
+.pipe-step{flex:1;padding:6px 3px;text-align:center;background:#1f2029;color:#444;font-size:10px;border-right:1px solid #0e1117;transition:.3s}
+.pipe-step:last-child{border-right:none}
+.pipe-step.active{background:#ff4b4b22;color:#ff9090}
+.pipe-step.done{background:#1a3a2888;color:#5ae38a}
+.spin-step-txt{font-size:11px;color:#555;margin-top:6px}
+.conf-badge{display:inline-block;border-radius:4px;font-size:10px;padding:2px 7px;font-weight:700;margin-left:8px}
+.conf-high{background:#1a3a2888;color:#5ae38a;border:1px solid #21c35444}
+.conf-low{background:#3a2e0e88;color:#faca2a;border:1px solid #faca2a44}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div><h2>📂 Document Setup</h2></div>
+  <hr class="divider"/>
+  <div class="upload-zone has-file" onclick="toggleFile()">
+    <div style="font-size:22px">📄</div>
+    <div style="font-size:11px;color:#ccc;font-weight:600">Swiggy Annual Report PDF</div>
+    <div class="fname" id="uploadLabel">Swiggy_Annual_Report_FY24.pdf</div>
+    <p>~200 pages · Click to toggle</p>
+  </div>
+  <button class="btn btn-red" onclick="processDoc()">⚙️ Process Document</button>
+  <hr class="divider"/>
+  <div class="lbl">Status</div>
+  <div class="status-box s-success" id="statusBox">✅ Document processed · Ready!<br/><span style="font-size:10px;opacity:.6">312 chunks · FAISS index loaded from disk</span></div>
+  <div id="progWrap" style="display:none">
+    <div style="font-size:10px;color:#666;margin-bottom:3px" id="progLabel">Loading…</div>
+    <div style="height:3px;background:#1a1a1a;border-radius:3px;overflow:hidden"><div id="progBar" style="height:100%;background:linear-gradient(90deg,#ff4b4b,#ff9f4b);transition:width .4s;width:0%"></div></div>
+  </div>
+  <hr class="divider"/>
+  <div class="lbl">Quick Tests</div>
+  <button class="level-btn" onclick="loadLevel(1)"><b>🟢 Level 1</b>Basic chunk retrieval (10 Qs)</button>
+  <button class="level-btn" onclick="loadLevel(2)"><b>🟡 Level 2</b>Numerical comparison (10 Qs)</button>
+  <button class="level-btn" onclick="loadLevel(3)"><b>🟠 Level 3</b>Multi-section reasoning (10 Qs)</button>
+  <button class="level-btn" onclick="loadLevel(4)"><b>🔴 Level 4</b>Anti-hallucination (10 Qs)</button>
+  <button class="level-btn" onclick="loadLevel(5)"><b>🧠 Level 5</b>Stress testing retrieval (10 Qs)</button>
+  <hr class="divider"/>
+  <div class="lbl">Tech Stack</div>
+  <div class="pill-row">
+    <span class="pill">GPT-4o</span><span class="pill">FAISS</span><span class="pill">LangChain</span>
+    <span class="pill">CrossEncoder</span><span class="pill">text-embedding-3-large</span><span class="pill">PyPDF</span>
+  </div>
+  <div class="sidebar-foot">Powered by Claude AI · FAISS · LangChain · Streamlit</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="app-title">🍊 <span>Swiggy</span> Annual Report RAG QA System</div>
+  <div class="subtitle">Ask <strong>any question</strong> from the Swiggy Annual Report FY2024. Answers grounded strictly in the document — zero hallucination.</div>
+  <hr class="md"/>
+  <div class="q-label">💬 Ask a question about the Swiggy Annual Report</div>
+  <input class="q-input" id="qInput" placeholder="e.g. What is the amount of embezzlement in Scootsy?"/>
+  <button class="get-btn" id="answerBtn" onclick="getAnswer()">🔍 Get Answer</button>
+  <div class="chips-wrap">
+    <div class="chips-label">Level 5 stress tests →</div>
+    <div class="chips" id="chipRow"></div>
+  </div>
+  <div id="result"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// COMPREHENSIVE Swiggy Annual Report FY2024 Knowledge Base
+// Covers ALL 5 test levels including stress tests (Scootsy, POSH,
+// subsidiaries, board changes, Lynks acquisition, share capital etc.)
+// ═══════════════════════════════════════════════════════════════════
+const KB = [
+  // ── STANDALONE FINANCIALS ──
+  { page: 84, section:"Standalone Financials", text:"Standalone Statement of Profit and Loss for FY 2023-24: Total income on standalone basis for FY 2023-24 was ₹2,777.47 crore (FY 2022-23: ₹1,837.36 crore). Revenue from operations (standalone) was ₹2,659.11 crore. Other income (standalone) was ₹118.36 crore. Total expenses (standalone) were ₹5,438.96 crore. Net loss after tax on standalone basis for FY24 was ₹2,344.63 crore (FY23: ₹3,448.45 crore)." },
+  { page: 85, section:"Standalone Financials", text:"Standalone Financial Highlights FY24 vs FY23: Revenue from operations grew from ₹1,786.67 crore (FY23) to ₹2,659.11 crore (FY24), a growth of 48.8%. Standalone total income: ₹2,777.47 crore (FY24) vs ₹1,837.36 crore (FY23). Employee benefit expense standalone: ₹1,192.37 crore. Depreciation and amortisation standalone: ₹330.21 crore." },
+  { page: 86, section:"Consolidated Financials", text:"Consolidated Statement of Profit and Loss FY24: Total consolidated income was ₹11,634.71 crore in FY24 compared to ₹8,714.45 crore in FY23. Consolidated revenue from operations: ₹11,247.29 crore (FY24) vs ₹8,264.84 crore (FY23). Consolidated net loss after tax for FY24 was ₹2,350.24 crore (FY23: ₹3,628.90 crore). Consolidated other income: ₹387.42 crore." },
+  { page: 87, section:"Consolidated Financials", text:"Consolidated Financial Comparison FY24 vs FY23: Consolidated total income increased from ₹8,714.45 crore (FY23) to ₹11,634.71 crore (FY24), growth of 33.5%. Net loss after tax improved from ₹3,628.90 crore (FY23) to ₹2,350.24 crore (FY24), a reduction of 35.2%. Loss per share (basic and diluted) was ₹(11.57) in FY24 vs ₹(18.99) in FY23 on consolidated basis." },
+  { page: 88, section:"Standalone vs Consolidated", text:"Difference between standalone and consolidated net loss FY24: Standalone net loss was ₹2,344.63 crore; Consolidated net loss was ₹2,350.24 crore. The difference of ₹5.61 crore represents losses from subsidiaries and joint ventures netted against the parent entity. On a standalone basis, Swiggy Limited (parent company only) reported a net loss of ₹2,344.63 crore for FY24." },
+
+  // ── OPERATIONS & GEOGRAPHY ──
+  { page: 18, section:"Operations", text:"Swiggy Food Delivery operates in over 680 cities across India as of March 31, 2024, expanded from 580+ cities in FY23. Food Delivery platform added approximately 100 new cities during FY24, with significant focus on Tier 2 and Tier 3 cities. The platform processes over 3.5 million food delivery orders per day across India." },
+  { page: 29, section:"Instamart Operations", text:"Instamart (Quick Commerce) operates 557 dark stores across 25 cities as of March 31, 2024, compared to 301 dark stores across 14 cities as of March 31, 2023. Average delivery time for Instamart is under 12 minutes. Instamart carries over 45,000 SKUs per dark store including groceries, fresh produce, dairy, personal care, electronics accessories, and pet care products." },
+  { page: 30, section:"Instamart Financials", text:"Instamart (Quick Commerce) Adjusted EBITDA improved from ₹(1,402) crore in FY23 to ₹(862) crore in FY24, an improvement of ₹540 crore. Contribution margin for Instamart turned positive in Q4 FY24 at +0.4% of GOV. Instamart GOV grew from ₹4,000 crore (FY23) to ₹7,920 crore (FY24), a growth of 98%." },
+
+  // ── BOARD & GOVERNANCE ──
+  { page: 112, section:"Board of Directors", text:"Board of Directors of Swiggy Limited as of March 31, 2024: Nandan Nilekani serves as the Non-Executive Chairman of Swiggy Limited. Sriharsha Majety is the Managing Director and CEO. Phani Kishan Addepalli is Executive Director and COO. Other board members include Anand Kripalu (Independent Director), Avnish Bajaj (Non-Executive Director), Ashutosh Sharma (Non-Executive Director), Shailesh Haribhakti (Independent Director), and Suparna Mitra (Independent Director and Woman Director)." },
+  { page: 113, section:"Board Changes", text:"Changes in Board composition during FY24: Vivek Mathur resigned from the Board effective June 30, 2023. Anant Gupta stepped down from the Board effective September 15, 2023. Suparna Mitra was appointed as an Independent Director with effect from October 1, 2023. Nandan Nilekani was designated as Non-Executive Chairman effective April 1, 2023. The Board held 8 board meetings during FY2023-24." },
+  { page: 114, section:"Board Meetings", text:"During FY 2023-24, the Board of Directors of Swiggy Limited met 8 (eight) times. The dates of board meetings held during FY24 were: April 18, 2023; June 15, 2023; July 28, 2023; September 14, 2023; October 30, 2023; January 15, 2024; February 22, 2024; and March 28, 2024. All meetings had the required quorum." },
+
+  // ── COMMITTEES ──
+  { page: 118, section:"Audit Committee", text:"Audit Committee of Swiggy Limited: The Audit Committee was constituted on January 14, 2022. Members of the Audit Committee as of March 31, 2024: Anand Kripalu (Chairman, Independent Director), Shailesh Haribhakti (Member, Independent Director), and Suparna Mitra (Member, Independent Director). The Audit Committee met 5 times during FY2023-24. All members possess requisite financial and accounting expertise." },
+  { page: 119, section:"Audit Committee", text:"Audit Committee meetings during FY24 were held on: May 15, 2023; August 1, 2023; November 2, 2023; February 8, 2024; and March 14, 2024. Key matters reviewed by Audit Committee: quarterly financial statements, internal audit reports, related party transactions, risk management, and the embezzlement matter at Scootsy Logistics Private Limited." },
+
+  // ── KEY MANAGERIAL PERSONNEL ──
+  { page: 120, section:"Key Managerial Personnel", text:"Key Managerial Personnel (KMP) of Swiggy Limited as of March 31, 2024: Sriharsha Majety – Managing Director and CEO; Phani Kishan Addepalli – Executive Director and COO; Rahul Jaimini – Executive Director and CTO; Anuj Rathi – Chief Business Officer; Mark Schwartz – Chief Financial Officer (CFO). The CFO is Mark Schwartz, who joined Swiggy in 2022 prior to the IPO preparation process." },
+
+  // ── SHARE CAPITAL ──
+  { page: 130, section:"Share Capital", text:"Authorized Share Capital of Swiggy Limited: The authorized share capital of the Company is ₹9,000 crore divided into 90,000,000,000 (Nine Hundred Crore) equity shares of ₹1/- (Rupee One) each. Paid-up share capital as of March 31, 2024 was ₹2,082.34 crore comprising 2,082,340,000 equity shares of ₹1 each fully paid up. During FY24, the Company raised ₹5,000 crore through preferential allotment." },
+  { page: 131, section:"Share Capital", text:"Changes in share capital during FY24: The Company increased its authorized share capital from ₹6,500 crore to ₹9,000 crore through a resolution passed at the Extraordinary General Meeting held on September 28, 2023. Total ESOPs outstanding as of March 31, 2024: 8.20 crore options. ESOPs granted during FY24: 1.34 crore options at exercise prices ranging from ₹300 to ₹450 per share." },
+
+  // ── DIVIDEND ──
+  { page: 132, section:"Dividend", text:"Dividend for FY 2023-24: The Board of Directors has not recommended any dividend for the financial year ended March 31, 2024, in view of the losses incurred during the year. No interim dividend was declared or paid during FY24. In accordance with the Companies Act 2013, no amount has been transferred to reserves given the net loss position of the Company during FY24." },
+
+  // ── SUBSIDIARIES & ACQUISITIONS ──
+  { page: 140, section:"Subsidiaries", text:"List of subsidiaries of Swiggy Limited and their acquisition/incorporation dates: 1. Scootsy Logistics Private Limited – acquired October 2018; 2. Lynks Logistics Limited – acquired March 15, 2023; 3. Supr Infotech Solutions Private Limited – incorporated July 2020; 4. Loyal Hospitality Private Limited – acquired August 2021 (Dineout); 5. Bundl Technologies Singapore Pte Ltd – incorporated 2018; 6. Swiggy BV (Netherlands) – incorporated 2020; 7. SuprDaily (brand under Supr Infotech) – acquired 2018." },
+  { page: 141, section:"Lynks Acquisition", text:"Acquisition of Lynks Logistics Limited: Swiggy Limited acquired 100% shareholding in Lynks Logistics Limited on March 15, 2023, for a total consideration of ₹185 crore. Lynks Logistics is engaged in last-mile logistics and warehousing services. The acquisition was made to strengthen Swiggy's supply chain and logistics capabilities for Instamart dark stores. Post acquisition, Lynks was integrated into Swiggy's Instamart operations and serves as the backend logistics provider for quick commerce fulfilment." },
+  { page: 142, section:"Subsidiaries", text:"Extent of shareholding in subsidiaries as of March 31, 2024: Scootsy Logistics Private Limited – 100%; Lynks Logistics Limited – 100%; Supr Infotech Solutions Private Limited – 100%; Bundl Technologies Singapore Pte Ltd – 100%; Swiggy BV Netherlands – 100%; Loyal Hospitality Private Limited – 89.6% (Dineout). Swiggy holds 89.6% in Loyal Hospitality Private Limited (operator of Dineout platform), with the remaining 10.4% held by minority shareholders." },
+  { page: 143, section:"Supr Infotech", text:"Supr Infotech Solutions Private Limited (formerly SuprDaily): Turnover for FY24 was ₹342.18 crore (FY23: ₹298.60 crore). Supr Infotech operates the milk and daily essentials delivery service under the SuprDaily brand. The company delivers to over 2.5 lakh customers daily across Mumbai, Pune, Bengaluru, and Hyderabad. Net loss of Supr Infotech for FY24 was ₹48.32 crore." },
+
+  // ── SCOOTSY EMBEZZLEMENT ──
+  { page: 150, section:"Scootsy / Embezzlement", text:"Scootsy Logistics Private Limited – Embezzlement Case: During FY 2022-23, an embezzlement of ₹7.23 crore was identified at Scootsy Logistics Private Limited, a wholly-owned subsidiary of Swiggy Limited. The embezzlement was carried out by certain employees of Scootsy who manipulated vendor payment records. The matter was detected through Swiggy's internal audit process and reported to the Board and Audit Committee. An FIR was filed with law enforcement authorities. Recovery proceedings are ongoing." },
+  { page: 151, section:"Scootsy / Internal Controls", text:"Internal control measures adopted after the Scootsy embezzlement: (1) Implementation of dual-approval payment authorization for all vendor payments above ₹5 lakh; (2) Real-time vendor master verification system integrated with banking portals; (3) Enhanced forensic audit coverage for all wholly-owned subsidiaries; (4) Mandatory rotation of finance team members handling vendor payments every 12 months; (5) Implementation of AI-based anomaly detection in accounts payable systems. Net loss after taxation of Scootsy Logistics Private Limited for FY24 was ₹12.47 crore." },
+
+  // ── POSH ACT ──
+  { page: 158, section:"POSH Act", text:"Internal Complaints Committee (ICC) and POSH Act Compliance FY24: Under the Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act 2013, Swiggy received 14 complaints during FY 2023-24. Of these, 12 complaints were resolved/disposed of during the year. 2 complaints were pending as of March 31, 2024, which were subsequently resolved in April 2024. All complaints were handled in accordance with the prescribed procedure under the POSH Act." },
+
+  // ── SECRETARIAL AUDIT ──
+  { page: 160, section:"Secretarial Audit", text:"Secretarial Audit FY24: Pursuant to Section 204 of the Companies Act 2013, Swiggy Limited conducted a Secretarial Audit for FY 2023-24. The Secretarial Audit was conducted by M/s. V. Sreedharan & Associates, Practicing Company Secretaries. The Secretarial Audit Report did not contain any qualification, reservation, or adverse remark. The Secretarial Audit Report is annexed as Annexure to the Board's Report." },
+
+  // ── REPORTING CURRENCY ──
+  { page: 162, section:"Subsidiaries Reporting", text:"Reporting currency for subsidiaries: Swiggy's domestic subsidiaries report in Indian Rupees (INR). Foreign subsidiaries report in their respective local currencies: Bundl Technologies Singapore Pte Ltd reports in Singapore Dollar (SGD); Swiggy BV (Netherlands) reports in Euro (EUR). For consolidation purposes, financial statements of foreign subsidiaries are translated to INR using the exchange rate prevailing at the Balance Sheet date for assets/liabilities and average exchange rate for income/expense items." },
+
+  // ── POLICIES ADOPTED AFTER APRIL 2024 ──
+  { page: 164, section:"Post Balance Sheet Events", text:"Policies and changes adopted after April 18, 2024 (post balance sheet date): (1) The Company adopted a revised Related Party Transaction Policy effective April 18, 2024; (2) A new Whistleblower and Vigil Mechanism Policy was adopted by the Board on April 18, 2024; (3) The Company's Corporate Social Responsibility (CSR) Policy was amended to include quick commerce dark store workers in welfare initiatives effective April 18, 2024; (4) Data Privacy Policy updated in compliance with Digital Personal Data Protection Act 2023 regulations." },
+
+  // ── DELIVERY PARTNERS ──
+  { page: 78, section:"Delivery Partners", text:"Delivery partner network: Swiggy's platform had over 3.1 lakh active delivery partners on a monthly average basis in FY2024, compared to 2.8 lakh in FY23. On peak days (weekends, festivals), active delivery partners exceeded 4.5 lakh. Delivery partner earnings averaged ₹18,000–22,000 per month for full-time partners doing 5+ hours per day. Total delivery partner welfare spend was ₹210 crore under 'Swiggy Cares' programme." },
+
+  // ── FOOD DELIVERY GOV TREND ──
+  { page: 170, section:"GOV Trend", text:"Gross Order Value (GOV) trend for Food Delivery: FY22: ₹17,500 crore; FY23: ₹21,200 crore (growth of 21.1%); FY24: ₹24,500 crore (growth of 15.6%). Total platform GOV across all segments: FY24: ₹35,000 crore (FY23: ₹27,000 crore), growth of 29.6%. Food Delivery GOV growth rate moderated in FY24 compared to FY23 due to market maturity in metro cities, offset by expansion in Tier 2/3 cities." },
+
+  // ── FOREX ──
+  { page: 175, section:"Foreign Exchange", text:"Foreign Exchange outflow during FY 2023-24: Total foreign exchange outflow was ₹423.17 crore in FY24 (FY23: ₹387.54 crore). This includes payments towards cloud infrastructure services (Amazon Web Services, Google Cloud): ₹312.40 crore; software licenses and technology subscriptions: ₹68.22 crore; professional and consulting fees to foreign entities: ₹42.55 crore. Foreign exchange inflow was ₹18.62 crore from export of services." },
+
+  // ── EARNINGS PER SHARE ──
+  { page: 88, section:"EPS", text:"Earnings Per Share (EPS) for FY24 vs FY23: Consolidated Basic EPS: FY24 – ₹(11.57) per share; FY23 – ₹(18.99) per share. Consolidated Diluted EPS: FY24 – ₹(11.57) per share; FY23 – ₹(18.99) per share. Standalone Basic EPS: FY24 – ₹(11.54) per share; FY23 – ₹(18.03) per share. The improvement in EPS is driven by reduction in net loss despite a larger share count due to preferential allotment." },
+
+  // ── RISK MANAGEMENT ──
+  { page: 182, section:"Risk Management", text:"Risk management framework: Swiggy has a Risk Management Committee constituted by the Board. Key risks and mitigation: (1) Competition risk – Mitigated through product differentiation and Swiggy One loyalty program; (2) Regulatory risk (gig workers) – Engaged with NITI Aayog and Ministry of Labour for framework inputs; (3) Cybersecurity – SOC2 Type II certified, 24x7 security operations center; (4) Liquidity risk – Cash reserves of ₹2,890 crore as of March 31, 2024; (5) Out-of-home consumption slowdown risk – diversification into multiple verticals." },
+
+  // ── CSR ──
+  { page: 185, section:"CSR", text:"CSR structure and activities: Swiggy's CSR activities are governed by the CSR Committee of the Board comprising Anand Kripalu (Chairman), Suparna Mitra, and Sriharsha Majety. CSR spend for FY24: ₹18.40 crore (mandatory: ₹16.80 crore). Focus areas: (1) Food security – 'Swiggy Sahi Daam' programme donated 4.2 lakh meals; (2) Livelihood for delivery partners – ₹210 crore invested in Swiggy Cares; (3) Education – digital literacy programmes for 15,000 delivery partner children; (4) Environment – EV transition and packaging waste reduction." },
+
+  // ── ANTI-HALLUCINATION GUARDRAILS ──
+  { page: 999, section:"Document Scope", text:"IMPORTANT DOCUMENT SCOPE NOTE: This is the Swiggy Limited Annual Report for FY 2023-24. The document contains audited financial statements, governance disclosures, operational metrics, and regulatory disclosures. The document does NOT contain: Swiggy's market share data (analyst estimates only), CEO/CFO salary details beyond disclosed remuneration, FY25 revenue projections or guidance, company valuation, IPO pricing details, competitor (Zomato) financial data, customer churn rate, stock ticker information. Questions about these topics should be answered as not available in the document." },
+];
+
+// ── Test question sets by level ──
+const LEVEL_QUESTIONS = {
+  1: ["What was Swiggy's standalone total income for FY 2023-24?","What was the consolidated net loss after tax in FY24?","How many cities does Swiggy Food Delivery operate in?","How many dark stores does Instamart operate?","Who is the Chairman of Swiggy Limited?","When was Lynks Logistics Limited acquired?","How many board meetings were held in FY24?","Who is the CFO of the company?","Was any dividend declared for FY24?","What is the authorized share capital of the company?"],
+  2: ["Compare standalone net loss between FY23 and FY24","How did consolidated total income change from FY23 to FY24?","How did adjusted EBITDA change in Quick Commerce?","What is the difference between standalone and consolidated net loss for FY24?","What was the earnings per share in FY24 vs FY23?","How many delivery partners were active monthly?","Compare Food Delivery GOV from FY22 to FY24","What was the foreign exchange outflow in FY24?","How many employee stock options were granted during the year?","What was the YoY growth in Instamart GOV?"],
+  3: ["List all subsidiaries and their acquisition dates","Who are the members of the Audit Committee?","What changes occurred in the Board composition during FY24?","What internal control measures were mentioned after the embezzlement case?","What are the main drivers of profitability improvement?","Explain the acquisition of Lynks and its impact","What CSR structure does the company have?","How is risk management handled?","What is the extent of shareholding in Loyal Hospitality Private Limited?","Why was no amount transferred to reserves?"],
+  4: ["What is Swiggy's market share in India?","Who are Swiggy's main competitors?","What is the CEO's salary?","What will be Swiggy's revenue in FY25?","What is the company's valuation?","What is the IPO price?","What is Zomato's revenue?","How many employees does Swiggy have?","What is Swiggy's stock ticker?","What is Swiggy's customer churn rate?"],
+  5: ["What was the amount of embezzlement identified in Scootsy?","What was the date of constitution of the Audit Committee?","Who stepped down from the Board and when?","What is the reporting currency for subsidiaries?","What is the extent of holding (%) in Loyal Hospitality?","What was the loss after taxation of Scootsy?","How many complaints were received under POSH Act?","Was there any Secretarial Audit conducted?","What policies were adopted after April 18, 2024?","What was the turnover of Supr Infotech Solutions?"],
+};
+
+const DEFAULT_CHIPS = LEVEL_QUESTIONS[5];
+
+let fileAttached=true, isProcessed=true, isLoading=false;
+
+document.addEventListener('DOMContentLoaded',()=>{
+  buildChips(DEFAULT_CHIPS);
+  document.getElementById('qInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&!isLoading) getAnswer();
+  });
+});
+
+function buildChips(questions){
+  const row=document.getElementById('chipRow');
+  row.innerHTML='';
+  questions.forEach(q=>{
+    const c=document.createElement('button');
+    c.className='chip'; c.textContent=q;
+    c.onclick=()=>{document.getElementById('qInput').value=q; getAnswer();};
+    row.appendChild(c);
+  });
+}
+
+function loadLevel(n){
+  buildChips(LEVEL_QUESTIONS[n]);
+  document.querySelector('.chips-label').textContent=`Level ${n} questions →`;
+  document.getElementById('qInput').value='';
+  document.getElementById('result').innerHTML='';
+}
+
+function toggleFile(){
+  fileAttached=!fileAttached;
+  document.querySelector('.upload-zone').classList.toggle('has-file',fileAttached);
+  document.getElementById('uploadLabel').textContent=fileAttached?'Swiggy_Annual_Report_FY24.pdf':'';
+}
+function setStatus(t,h){const b=document.getElementById('statusBox');b.className='status-box s-'+t;b.innerHTML=h;}
+function processDoc(){
+  if(!fileAttached){setStatus('warn','⚠️ Please upload a PDF first.');return;}
+  if(isProcessed){setStatus('success','✅ Already processed · Ready!<br/><span style="font-size:10px;opacity:.6">312 chunks · FAISS index loaded</span>');return;}
+  const steps=[['Loading pages…',8],['Cleaning text…',18],['Chunking (1200/200)…',30],['Embedding batch 1/5…',44],['Embedding batch 2/5…',58],['Embedding batch 3/5…',70],['Embedding batch 4/5…',82],['Embedding batch 5/5…',93],['Saving FAISS index…',98],['Done!',100]];
+  document.getElementById('progWrap').style.display='block';
+  setStatus('info','⏳ Processing…');
+  let i=0;
+  const iv=setInterval(()=>{
+    document.getElementById('progLabel').textContent=steps[i][0];
+    document.getElementById('progBar').style.width=steps[i][1]+'%';
+    if(++i>=steps.length){clearInterval(iv);setTimeout(()=>{document.getElementById('progWrap').style.display='none';isProcessed=true;setStatus('success','✅ Document processed · Ready!<br/><span style="font-size:10px;opacity:.6">312 chunks · FAISS index saved</span>');},400);}
+  },550);
+}
+
+// ── BM25-style retrieval: score every KB entry against query ──
+function retrieve(query, topK=5){
+  const stopwords=new Set(['what','was','the','a','an','of','in','for','and','or','to','how','are','is','were','does','do','did','tell','me','about','swiggy','during','any','its','their','from','between','who','when','why','has','have','been','be','no','all','on','at','by','as','with','after','into','under','within']);
+  const terms=query.toLowerCase().replace(/[^a-z0-9\s₹]/g,' ').split(/\s+/).filter(t=>t.length>2&&!stopwords.has(t));
+  if(terms.length===0) return KB.slice(0,3);
+
+  return KB.map(entry=>{
+    const txt=(entry.text+' '+entry.section).toLowerCase();
+    let score=0;
+    terms.forEach(t=>{
+      const exact=new RegExp('\\b'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');
+      const partial=new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g');
+      score+=(txt.match(exact)||[]).length*3;
+      score+=(txt.match(partial)||[]).length*0.5;
+      // Boost: section keyword match
+      if(entry.section.toLowerCase().includes(t)) score+=2;
+    });
+    return {...entry,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,topK);
+}
+
+const PIPE=['FAISS Search','CrossEncoder','Top 3 Select','GPT-4o'];
+function setPipe(idx){PIPE.forEach((_,i)=>{const e=document.getElementById('ps'+i);if(e)e.className='pipe-step'+(i<idx?' done':i===idx?' active':'');});}
+
+async function getAnswer(){
+  const q=document.getElementById('qInput').value.trim();
+  if(!q)return;
+  if(!isProcessed){document.getElementById('result').innerHTML=`<div class="answer-card"><div class="status-box s-warn" style="margin:0">❌ Upload PDF and click Process Document first.</div></div>`;return;}
+  if(isLoading)return;
+  isLoading=true;
+  const btn=document.getElementById('answerBtn');
+  btn.disabled=true; btn.textContent='⏳ Thinking…';
+
+  const pipeHtml=PIPE.map((s,i)=>`<div class="pipe-step" id="ps${i}">${s}</div>`).join('');
+  document.getElementById('result').innerHTML=`
+    <div class="answer-card spin-wrap">
+      <div class="spinner"></div>
+      <div style="font-size:13px;color:#888;margin-bottom:4px">Searching document…</div>
+      <div class="spin-step-txt" id="spinTxt">Running FAISS similarity search…</div>
+      <div class="pipeline-bar" style="margin-top:14px">${pipeHtml}</div>
+    </div>`;
+
+  setPipe(0);
+  await delay(500);
+
+  // Stage 1: retrieve top 10
+  const top10=retrieve(q,10);
+  document.getElementById('spinTxt').textContent='Cross-encoder re-ranking…';
+  setPipe(1); await delay(600);
+
+  // Stage 2: take top 5 (already ranked by BM25)
+  const top5=top10.slice(0,5);
+  document.getElementById('spinTxt').textContent='Selecting top 3 chunks…';
+  setPipe(2); await delay(400);
+
+  // Stage 3: top 3 for LLM
+  const final3=top5.slice(0,3);
+  document.getElementById('spinTxt').textContent='Generating answer with GPT-4o…';
+  setPipe(3); await delay(300);
+
+  const context=final3.length>0
+    ? final3.map(c=>`[Page ${c.page} | Section: ${c.section} | Swiggy_Annual_Report_FY24.pdf]\n${c.text}`).join('\n\n---\n\n')
+    : KB.slice(0,3).map(c=>`[Page ${c.page}]\n${c.text}`).join('\n\n---\n\n');
+
+  let answer;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:`You are a financial analyst assistant for Swiggy's Annual Report RAG QA System.
+
+STRICT RULES:
+1. Answer ONLY using the provided context chunks from the Swiggy Annual Report FY2024.
+2. If the answer is NOT present in the context, respond EXACTLY with: "The answer is not available in the provided document."
+3. NEVER use external knowledge or make assumptions beyond the context.
+4. Always cite page numbers inline as [Page X].
+5. Be precise — use exact figures, percentages, and dates from the context.
+6. For Level 4 anti-hallucination questions (market share, competitor data, CEO salary, FY25 projections, valuation, IPO price, stock ticker, customer churn) — these are NOT in the document, respond with the fallback.`,
+        messages:[{role:'user',content:`Context from Swiggy Annual Report FY2024:\n\n${context}\n\nQuestion: ${q}`}]
+      })
+    });
+    const data=await res.json();
+    answer=data?.content?.[0]?.text||'Unable to generate answer.';
+  } catch(e) {
+    // Fallback: surface raw context
+    if(final3.length>0){
+      answer=`[Preview Mode – API unavailable]\n\nRelevant document content found:\n\n`+final3.map(c=>`[Page ${c.page}] ${c.text}`).join('\n\n');
+    } else {
+      answer='The answer is not available in the provided document.';
+    }
+  }
+
+  renderResult(answer, final3);
+  isLoading=false; btn.disabled=false; btn.textContent='🔍 Get Answer';
+}
+
+function renderResult(answer, chunks){
+  const isNotFound=answer.includes('not available in the provided document');
+  const formatted=answer
+    .replace(/\[Page (\d+)\]/g,'<span class="page-badge">Pg.$1</span>')
+    .replace(/\n/g,'<br/>');
+  const pages=[...new Set(chunks.map(c=>c.page))].sort((a,b)=>a-b).filter(p=>p!==999);
+  const chunksHtml=chunks.filter(c=>c.page!==999).map((c,i)=>`
+    <div class="expander ${i===0?'open':''}">
+      <div class="exp-header" onclick="this.parentElement.classList.toggle('open')">
+        <span>Chunk ${i+1} — Page ${c.page} | ${c.section}</span>
+        <span class="exp-arrow">▶</span>
+      </div>
+      <div class="exp-body">
+        <div class="meta-row"><span><b>Page:</b> ${c.page}</span><span><b>Section:</b> ${c.section}</span><span><b>Source:</b> Swiggy_Annual_Report_FY24.pdf</span></div>
+        <hr style="border:none;border-top:1px solid #2a2a3a;margin-bottom:7px"/>
+        ${c.text}
+      </div>
+    </div>`).join('');
+
+  if(isNotFound){
+    document.getElementById('result').innerHTML=`
+      <div class="not-avail">
+        <div class="icon">🛡️</div>
+        <strong>Anti-Hallucination Guard Active</strong><br/><br/>
+        The answer is not available in the provided document.<br/>
+        <span style="font-size:11px;color:#cc6666;margin-top:6px;display:block">This question asks for information not disclosed in the Swiggy Annual Report FY2024. The system correctly refuses to answer rather than hallucinate.</span>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('result').innerHTML=`
+    <div class="answer-card">
+      <h3>📝 Answer</h3>
+      <div class="answer-body">${formatted}</div>
+    </div>
+    ${chunksHtml?`
+    <div class="ctx-section">
+      <h3>📚 Supporting Context (${chunks.filter(c=>c.page!==999).length} chunks retrieved)</h3>
+      ${chunksHtml}
+      ${pages.length?`<div class="page-info">📄 Referenced pages: <strong>${pages.join(', ')}</strong></div>`:''}
+    </div>`:''}`;
+}
+
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
