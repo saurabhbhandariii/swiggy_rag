@@ -22,7 +22,7 @@ from rag_pipeline import (
 # Page Config
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Swiggy Annual Report RAG QA System",
+    page_title=" RAG QA System",
     page_icon="🍊",
     layout="wide",
 )
@@ -51,7 +51,7 @@ with st.sidebar:
     st.markdown("---")
 
     uploaded_file = st.file_uploader(
-        "Upload Swiggy Annual Report PDF",
+        "Upload Any  PDF",
         type=["pdf"],
         help="Supports 200+ page PDFs",
     )
