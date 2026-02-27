@@ -23,7 +23,7 @@ from rag_pipeline import (
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title=" RAG QA System",
-    page_icon="🍊",
+    page_icon="RAG",
     layout="wide",
 )
 
@@ -113,7 +113,7 @@ with st.sidebar:
 # ─────────────────────────────────────────────
 st.title("  RAG QA System")
 st.markdown(
-    "Ask any question about the Swiggy Annual Report. "
+    "Ask any question about the PDF you have Uploaded. "
     "Answers are grounded **strictly** in the document — no hallucination."
 )
 st.markdown("---")
