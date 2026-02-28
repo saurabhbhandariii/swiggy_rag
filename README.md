@@ -1,4 +1,4 @@
-# 🍊 Swiggy Annual Report RAG QA System
+# RAG QA System
 
 ## Assignment Objective
 
@@ -87,7 +87,7 @@ faiss_index/            ← Auto-created after first processing
 ### 1. Clone / Download the project
 
 ```bash
-git clone <your-repo-url>
+git clone <https://github.com/saurabhbhandariii/swiggy_rag>
 cd rag_app
 ```
 
