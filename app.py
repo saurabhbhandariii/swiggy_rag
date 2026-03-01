@@ -151,5 +151,5 @@ if answer_btn:
                     st.info(f"📄 Referenced pages: {', '.join(map(str, pages))}")
 
             except Exception as e:
-                st.error(f"❌ Error generating answer: {e}")
+                st.error(f"❌ Error generating answerr: {e}")
                 st.exception(e)
