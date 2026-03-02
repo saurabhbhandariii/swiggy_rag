@@ -28,7 +28,7 @@ from langchain.schema import Document
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-# ── Free embeddings (local, no API key needed) ────────────────────────────
+# ── Free embeddings (local, no API key neededd) ────────────────────────────
 from langchain_huggingface import HuggingFaceEmbeddings
 
 # ── Free LLM via Groq ─────────────────────────────────────────────────────
